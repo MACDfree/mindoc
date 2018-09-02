@@ -31,6 +31,8 @@
                     <li><a href="{{urlfor "ManagerController.Books" }}" class="item"><i class="fa fa-book" aria-hidden="true"></i> 项目管理</a> </li>
                     <li class="active"><a href="{{urlfor "ManagerController.Comments" }}" class="item"><i class="fa fa-comments-o" aria-hidden="true"></i> 评论管理</a> </li>
                     <li><a href="{{urlfor "ManagerController.Setting" }}" class="item"><i class="fa fa-cogs" aria-hidden="true"></i> 配置管理</a> </li>
+                    <li><a href="{{urlfor "ManagerController.AttachList" }}" class="item"><i class="fa fa-cloud-upload" aria-hidden="true"></i> 附件管理</a> </li>
+                    <li><a href="{{urlfor "ManagerController.LabelList" }}" class="item"><i class="fa fa-bookmark" aria-hidden="true"></i> 标签管理</a> </li>
                 </ul>
             </div>
             <div class="page-right">
@@ -40,7 +42,40 @@
                     </div>
                 </div>
                 <div class="box-body">
-
+                <div class="comment-list" id="commentList">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>评论内容</th>
+                                <th>项目/文章名称</th>
+                                <th>评论时间</th>
+                                <th>评论状态</th>
+                                <th>操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {{range $index,$item := .Lists}}
+                            <tr>
+                                <td>{{$item.AttachmentId}}</td>
+                                <td>{{$item.FileName}}</td>
+                                <td>{{$item.BookName}}</td>
+                                <td>{{$item.FileShortSize}}</td>
+                                <td>{{ if $item.IsExist }} 是{{else}}否{{end}}</td>
+                                <td>
+                                    <button type="button" data-method="delete" class="btn btn-danger btn-sm" data-id="{{$item.AttachmentId}}" data-loading-text="删除中...">删除</button>
+                                    <a href="{{urlfor "ManagerController.AttachDetailed" ":id" $item.AttachmentId}}" class="btn btn-success btn-sm">详情</a>
+                                </td>
+                            </tr>
+                            {{else}}
+                            <tr><td class="text-center" colspan="6">暂无数据</td></tr>
+                            {{end}}
+                            </tbody>
+                        </table>
+                        <nav class="pagination-container">
+                            {{.PageHtml}}
+                        </nav>
+                    </div>
                 </div>
             </div>
         </div>
@@ -48,5 +83,34 @@
 </div>
 <script src="/static/jquery/1.12.4/jquery.min.js"></script>
 <script src="/static/bootstrap/js/bootstrap.min.js"></script>
+<script src="{{cdnjs "/static/js/jquery.form.js"}}" type="text/javascript"></script>
+<script src="{{cdnjs "/static/layer/layer.js" }}" type="text/javascript"></script>
+<script type="text/javascript">
+    $(function () {
+        $("#commentList").on("click","button[data-method='delete']",function () {
+            var id = $(this).attr("data-id");
+            var $this = $(this);
+            $(this).button("loading");
+            $.ajax({
+                url : "{{urlfor "ManagerController.LabelDelete" ":id" ""}}" + id,
+                type : "post",
+                dataType : "json",
+                success : function (res) {
+                    if(res.errcode === 0){
+                        $this.closest("tr").remove().empty();
+                    }else {
+                        layer.msg(res.message);
+                    }
+                },
+                error : function () {
+                    layer.msg("服务器异常");
+                },
+                complete : function () {
+                    $this.button("reset");
+                }
+            });
+        });
+    });
+</script>
 </body>
 </html>

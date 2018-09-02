@@ -11,7 +11,7 @@ import (
 	"github.com/lifei6671/mindoc/conf"
 )
 
-//检查最新版本.
+// CheckUpdate 检查最新版本.
 func CheckUpdate() {
 
 	resp, err := http.Get("https://api.github.com/repos/lifei6671/mindoc/tags")

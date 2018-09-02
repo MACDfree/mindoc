@@ -57,7 +57,7 @@ func (c *ManagerController) Users() {
 		pager := pagination.NewPagination(c.Ctx.Request, totalCount, conf.PageSize, c.BaseUrl())
 		c.Data["PageHtml"] = pager.HtmlPages()
 
-		for _,item := range members {
+		for _, item := range members {
 			item.Avatar = conf.URLForWithCdnImage(item.Avatar)
 		}
 	} else {
@@ -531,6 +531,25 @@ func (c *ManagerController) Comments() {
 		c.Abort("403")
 	}
 
+	pageIndex, _ := c.GetInt("page", 1)
+	comments, totalCount, err := models.NewComment().FindToPager(pageIndex, conf.PageSize)
+
+	if err != nil {
+		c.Abort("500")
+	}
+
+	if totalCount > 0 {
+		pager := pagination.NewPagination(c.Ctx.Request, totalCount, conf.PageSize, c.BaseUrl())
+		c.Data["PageHtml"] = pager.HtmlPages()
+	} else {
+		c.Data["PageHtml"] = ""
+	}
+
+	// for i, comment := range comments {
+	// 	comment[i]
+	// }
+	c.Data["Lists"] = comments
+
 }
 
 //DeleteComment 标记评论为已删除
@@ -668,7 +687,7 @@ func (c *ManagerController) AttachDelete() {
 		beego.Error("AttachDelete => ", err)
 		c.JsonResult(6001, err.Error())
 	}
-	attach.FilePath = filepath.Join(conf.WorkingDirectory,attach.FilePath)
+	attach.FilePath = filepath.Join(conf.WorkingDirectory, attach.FilePath)
 
 	if err := attach.Delete(); err != nil {
 		beego.Error("AttachDelete => ", err)
